@@ -66,7 +66,7 @@ You need to create the following relationships:
 
 Start by creating the models and migrations for the following database tables:
 
-![database diagram](/dbdiagram.png)
+![database diagram](./dbdiagram.png)
 
 Add any code needed in the model files to establish the relationships.
 
