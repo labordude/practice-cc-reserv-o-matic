@@ -101,7 +101,6 @@ Add validations to the `Reservation` model:
 - must have a `party_name`
 - must have a `customer_id` for the customer
 - must have a `location_id` for the location
-- must have a `party_size` and it cannot be larger than the `Location`s `max_party_size`.
 
 - a customer cannot have more than one reservation for the same `date` and `location`
 
