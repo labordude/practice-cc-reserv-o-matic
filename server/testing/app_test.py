@@ -8,6 +8,7 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 from app import app, db
 from models import Customer, Location, Reservation
+import datetime
 
 
 class TestApp:
@@ -304,33 +305,24 @@ class TestApp:
             pizza = Location(name="Happys Pizza", max_party_size=6)
             db.session.add_all([peter, pizza])
             db.session.commit()
+            reservation = Reservation(
+                reservation_date=datetime.datetime.strptime(
+                    "2023-06-20", "%Y-%m-%d"
+                ).date(),
+                customer_id=peter.id,
+                location_id=pizza.id,
+                party_size=4,
+                party_name="spider friends",
+            )
+            db.session.add(reservation)
+            db.session.commit()
 
-            response = (
-                app.test_client()
-                .post(
-                    "/reservations",
-                    json={
-                        "reservation_date": "2023-06-18",
-                        "customer_id": peter.id,
-                        "location_id": pizza.id,
-                        "party_size": 4,
-                        "party_name": "spider friends",
-                    },
-                )
-                .json
+            response = app.test_client().delete(
+                f"/reservations/{reservation.id}"
             )
 
-            assert response["id"]
-            assert response["customer_id"] == peter.id
-            assert response["location_id"] == pizza.id
-            assert response["party_size"] == 4
-            assert response["party_name"] == "spider friends"
-
-            db.session.query(Reservation).filter(
-                Reservation.party_name == "spider friends"
-            ).delete()
-            db.session.commit()
-            reservation = Reservation.query.filter(
-                Reservation.party_name == "spider friends"
+            assert response.status_code == 204
+            reserved = Reservation.query.filter(
+                Reservation.id == reservation.id
             ).first()
-            assert not reservation
+            assert not reserved

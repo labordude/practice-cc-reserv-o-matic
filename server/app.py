@@ -207,15 +207,12 @@ class ReservationsByID(Resource):
             return ({"error": "error"}, 400)
 
     def delete(self, id):
-        try:
-            reservation = Reservation.query.filter(
-                Reservation.id == id
-            ).first()
-            db.session.delete(reservation)
-            db.session.commit()
-            return ({}, 204)
-        except:
+        reservation = Reservation.query.filter(Reservation.id == id).first()
+        if not reservation:
             return ({"error": "404 not found"}, 404)
+        db.session.delete(reservation)
+        db.session.commit()
+        return ({}, 204)
 
 
 api.add_resource(ReservationsByID, "/reservations/<int:id>")
