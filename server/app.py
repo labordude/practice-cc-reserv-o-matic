@@ -181,6 +181,31 @@ class ReservationsByID(Resource):
         except:
             return ({"error": "404 not found"}, 404)
 
+    def patch(self, id):
+        print("in the patch route")
+        data = request.get_json()
+        reservation = Reservation.query.filter(Reservation.id == id).first()
+        if not reservation:
+            return ({"error": "404 not found"}, 404)
+        for attr in data:
+            print(attr, data)
+            if attr == "reservation_date":
+                setattr(
+                    reservation,
+                    attr,
+                    datetime.datetime.strptime(
+                        data.get("reservation_date"), "%Y-%m-%d"
+                    ).date(),
+                )
+            else:
+                setattr(reservation, attr, data.get(attr))
+        try:
+            db.session.add(reservation)
+            db.session.commit()
+            return reservation.to_dict(), 200
+        except Exception:
+            return ({"error": "error"}, 400)
+
     def delete(self, id):
         try:
             reservation = Reservation.query.filter(
