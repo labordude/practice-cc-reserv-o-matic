@@ -1,6 +1,10 @@
 import React from "react";
-
-function ReservationCard({reservation, onDeleteReservation}) {
+import {Link} from "react-router-dom";
+function ReservationCard({
+  reservation,
+  onDeleteReservation,
+  onEditReservation,
+}) {
   function handleDeleteReservation() {
     fetch(`/reservations/${reservation.id}`, {
       method: "DELETE",
@@ -19,6 +23,9 @@ function ReservationCard({reservation, onDeleteReservation}) {
       <td>{reservation.location.name}</td>
       <td>{reservation.party_size}</td>
       <td>
+        <Link to={`/reservations/${reservation.id}`}>
+          <button className="btn btn-sm btn-primary">Edit</button>{" "}
+        </Link>
         <button
           className="btn btn-sm btn-error"
           onClick={() => handleDeleteReservation()}>

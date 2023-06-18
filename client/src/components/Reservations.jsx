@@ -1,12 +1,18 @@
 import React from "react";
 import ReservationCard from "./ReservationCard";
 
-function Reservations({reservations, onDeleteReservation, toggleForms}) {
+function Reservations({
+  reservations,
+  onDeleteReservation,
+  toggleForms,
+  onEditReservation,
+}) {
   const displayReservations = reservations.map(reservation => (
     <ReservationCard
       key={reservation.id}
       reservation={reservation}
       onDeleteReservation={onDeleteReservation}
+      onEditReservation={onEditReservation}
     />
   ));
   return (
