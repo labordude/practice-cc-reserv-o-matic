@@ -269,7 +269,21 @@ along with the appropriate HTTP status code:
   "error": "400: Validation error"
 }
 ```
+### PATCH /reservations/<int:id>
 
+If the `Reservation` exists, update whatever fields you want.
+
+After updating the `Reservation`, return the updated reservation, along with the
+appropriate HTTP status code.
+
+If the `Reservation` does not exist, return the following JSON data, along with
+the appropriate HTTP status code:
+
+```json
+{
+  "error": "404: Reservation not found"
+}
+```
 ### DELETE /reservations/<int:id>
 
 If the `Reservation` exists, it should be removed from the database.
@@ -282,7 +296,7 @@ the appropriate HTTP status code:
 
 ```json
 {
-  "error": "404: Activity not found"
+  "error": "404: Reservation not found"
 }
 ```
 
