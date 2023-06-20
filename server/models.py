@@ -1,9 +1,10 @@
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy import MetaData, UniqueConstraint
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy_serializer import SerializerMixin
 import datetime
+from .database import Base
 
 convention = {
     "ix": "ix_%(column_0_label)s",
@@ -15,15 +16,13 @@ convention = {
 
 metadata = MetaData(naming_convention=convention)
 
-db = SQLAlchemy(metadata=metadata)
 
-
-class Customer(db.Model, SerializerMixin):
+class Customer(Base, SerializerMixin):
     __tablename__ = "customers"
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    email = db.Column(db.String, nullable=False, unique=True)
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    email = Column(String, nullable=False, unique=True)
 
     @validates("name")
     def validate_name(self, key, name):
@@ -38,7 +37,7 @@ class Customer(db.Model, SerializerMixin):
         return email
 
     # relationships
-    reservations = db.relationship("Reservation", back_populates="customer")
+    reservations = relationship("Reservation", back_populates="customer")
     locations = association_proxy("reservations", "location")
     serialize_rules = ("-reservations.customer",)
 
@@ -46,16 +45,16 @@ class Customer(db.Model, SerializerMixin):
         return f"<Customer name={self.name}, email={self.email}>"
 
 
-class Location(db.Model, SerializerMixin):
+class Location(Base, SerializerMixin):
     __tablename__ = "locations"
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    max_party_size = db.Column(db.Integer, nullable=False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    max_party_size = Column(Integer, nullable=False)
 
     customers = association_proxy("reservations", "customer")
     # relationships
-    reservations = db.relationship("Reservation", back_populates="location")
+    reservations = relationship("Reservation", back_populates="location")
     serialize_rules = ("-reservations.location",)
 
     @validates("name")
@@ -71,26 +70,22 @@ class Location(db.Model, SerializerMixin):
         return max_party_size
 
 
-class Reservation(db.Model, SerializerMixin):
+class Reservation(Base, SerializerMixin):
     __tablename__ = "reservations"
     __table_args__ = (
         UniqueConstraint("location_id", "customer_id", "reservation_date"),
     )
-    id = db.Column(db.Integer, primary_key=True)
-    party_name = db.Column(db.String, nullable=False)
+    id = Column(Integer, primary_key=True)
+    party_name = Column(String, nullable=False)
 
     # locations and relationships
-    location_id = db.Column(
-        db.Integer, db.ForeignKey("locations.id"), nullable=False
-    )
-    location = db.relationship("Location", back_populates="reservations")
+    location_id = Column(Integer, ForeignKey("locations.id"), nullable=False)
+    location = relationship("Location", back_populates="reservations")
     # customer and relationship
-    customer_id = db.Column(
-        db.Integer, db.ForeignKey("customers.id"), nullable=False
-    )
-    customer = db.relationship("Customer", back_populates="reservations")
-    party_size = db.Column(db.Integer, nullable=False)
-    reservation_date = db.Column(db.Date, nullable=False)
+    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
+    customer = relationship("Customer", back_populates="reservations")
+    party_size = Column(Integer, nullable=False)
+    reservation_date = Column(Date, nullable=False)
     serialize_rules = ("-location.reservations", "-customer.reservations")
 
     @validates("party_name")
